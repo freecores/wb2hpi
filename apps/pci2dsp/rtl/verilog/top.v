@@ -45,8 +45,8 @@
 // CVS History
 //
 // $Author: gvozden $
-// $Date: 2003-02-28 14:10:52 $
-// $Revision: 1.2 $
+// $Date: 2003-03-18 14:38:34 $
+// $Revision: 1.3 $
 
 module TOP
 (
@@ -101,8 +101,6 @@ module TOP
     CBE2,
     CBE3,
     
-    WB_CLK,
-
     DSP_HAD,
     DSP_HCNTL,
     DSP_HBIL,
@@ -118,8 +116,6 @@ module TOP
 
     LED
 );
-
-input         WB_CLK;
 
 inout  [ 7:0] DSP_HAD;
 output [ 1:0] DSP_HCNTL;
@@ -326,7 +322,7 @@ wire          DSP_HAD_en;
 pci_bridge32 bridge
 (
     // WISHBONE system signals
-    .wb_clk_i(WB_CLK),
+    .wb_clk_i(CLK),
     .wb_rst_i(RST_I),
     .wb_rst_o(RST_O),
     .wb_int_i(INT_I),
