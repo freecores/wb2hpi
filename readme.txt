@@ -1,6 +1,6 @@
 $Author: gvozden $
-$Date: 2003-08-01 07:49:09 $
-$Revision: 1.1 $  
+$Date: 2003-08-01 09:08:41 $
+$Revision: 1.2 $  
 $Name: not supported by cvs2svn $
 
 |-- apps                    : wb2hpi core applications
@@ -11,7 +11,7 @@ $Name: not supported by cvs2svn $
 |         |
 |         |-- rtl           : HDL source files (pci2hpi related)
 |         | 
-|         |-- sw            : sowtware (drivers, etc...)         
+|         |-- sw            : software (drivers, etc...)         
 |         |
 |         -- syn            : files needed for synthesis and implementation
 |              |
