@@ -38,9 +38,54 @@
 //
 // CVS Revision History
 //
-// $Author: gvozden $
-// $Date: 2003-01-16 18:06:03 $
-// $Revision: 1.1.1.1 $
+// $Log: not supported by cvs2svn $
+// Revision 1.2  2004/02/20 09:49:48  gvozden
+// izmenjeno koprianje strane, i dodato zatvaranje svih stranica odjednom
+//
+// Revision 1.13  2004/01/24 11:54:18  mihad
+// Update! SPOCI Implemented!
+//
+// Revision 1.12  2003/12/28 09:54:48  fr2201
+// def_wb_imagex_addr_map  defined correctly
+//
+// Revision 1.11  2003/12/28 09:20:00  fr2201
+// Reset values for PCI, WB defined (PCI_TAx,WB_BAx,WB_TAx,WB_AMx,WB_BAx_MEM_IO)
+//
+// Revision 1.10  2003/12/19 11:11:30  mihad
+// Compact PCI Hot Swap support added.
+// New testcases added.
+// Specification updated.
+// Test application changed to support WB B3 cycles.
+//
+// Revision 1.9  2003/08/03 18:05:06  mihad
+// Added limited WISHBONE B3 support for WISHBONE Slave Unit.
+// Doesn't support full speed bursts yet.
+//
+// Revision 1.8  2003/03/14 15:31:57  mihad
+// Entered the option to disable no response counter in wb master.
+//
+// Revision 1.7  2003/01/27 17:05:50  mihad
+// Updated.
+//
+// Revision 1.6  2003/01/27 16:51:19  mihad
+// Old files with wrong names removed.
+//
+// Revision 1.5  2003/01/21 16:06:56  mihad
+// Bug fixes, testcases added.
+//
+// Revision 1.4  2002/09/30 17:22:45  mihad
+// Added support for Virtual Silicon two port RAM. Didn't run regression on it yet!
+//
+// Revision 1.3  2002/08/13 11:03:53  mihad
+// Added a few testcases. Repaired wrong reset value for PCI_AM5 register. Repaired Parity Error Detected bit setting. Changed PCI_AM0 to always enabled(regardles of PCI_AM0 define), if image 0 is used as configuration image
+//
+// Revision 1.2  2002/03/05 11:53:47  mihad
+// Added some testcases, removed un-needed fifo signals
+//
+// Revision 1.1  2002/02/01 14:43:31  mihad
+// *** empty log message ***
+//
+//
 
 // Fifo implementation defines:
 // If FPGA and XILINX are defined, Xilinx's BlockSelectRAM+ is instantiated for Fifo storage.
@@ -76,8 +121,10 @@
 `else
     `define PCI_FIFO_RAM_ADDR_LENGTH 8      // PCI target unit fifo storage definition when RAM sharing is used ( both pcir and pciw fifo use same instance of RAM )
     `define WB_FIFO_RAM_ADDR_LENGTH 8       // WB slave unit fifo storage definition when RAM sharing is used ( both wbr and wbw fifo use same instance of RAM )
-    `define WB_ARTISAN_SDP
-    `define PCI_ARTISAN_SDP
+//    `define WB_ARTISAN_SDP
+//    `define PCI_ARTISAN_SDP
+//    `define PCI_VS_STP
+//    `define WB_VS_STP
 `endif
 
 // these two defines allow user to select active high or low output enables on PCI bus signals, depending on
@@ -87,8 +134,8 @@
 
 // HOST/GUEST implementation selection - see design document and specification for description of each implementation
 // only one can be defined at same time
-`define GUEST
 //`define HOST
+`define GUEST
 
 // if NO_CNF_IMAGE is commented out, then READ-ONLY access to configuration space is ENABLED:
 // - ENABLED Read-Only access from WISHBONE for GUEST bridges
@@ -146,6 +193,23 @@
 `define PCI_BA4_MEM_IO 1'b0
 `define PCI_BA5_MEM_IO 1'b0
 
+// initial value for PCI translation addresses. The  initial values
+// are set after reset. When ADDR_TRAN_IMPL is defined then then Images 
+// are transleted to this adresses whithout access to pci_ta registers.
+`define PCI_TA0 20'h0000_0
+`define PCI_TA1 20'h0000_0
+`define PCI_TA2 20'h0000_0
+`define PCI_TA3 20'h0000_0
+`define PCI_TA4 20'h0000_0
+`define PCI_TA5 20'h0000_0
+
+`define PCI_AT_EN0 1'b0
+`define PCI_AT_EN1 1'b0
+`define PCI_AT_EN2 1'b0
+`define PCI_AT_EN3 1'b0
+`define PCI_AT_EN4 1'b0
+`define PCI_AT_EN5 1'b0
+
 // number defined here specifies how many MS bits in WB address are compared with base address, to decode
 // accesses. Maximum number allows for minimum image size ( number = 20, image size = 4KB ), minimum number
 // allows for maximum image size ( number = 1, image size = 2GB ). If you intend on using different sizes of WB images,
@@ -162,10 +226,48 @@
 //`define WB_IMAGE3
 //`define WB_IMAGE4
 //`define WB_IMAGE5
+//Address bar register defines the base address for each image.
+//To asccess bus without Software configuration.
+`define  WB_BA1	20'h0000_0
+`define  WB_BA2	20'h0000_0
+`define  WB_BA3	20'h0000_0
+`define  WB_BA4	20'h0000_0
+`define  WB_BA5	20'h0000_0
+
+// initial value for WB image maping to MEMORY or IO spaces.  If initial define is set to 0,
+// then IMAGE with that base address points to MEMORY space, othervise it points ti IO space.
+`define  WB_BA1_MEM_IO  1'b0
+`define  WB_BA2_MEM_IO  1'b0
+`define  WB_BA3_MEM_IO	1'b0
+`define  WB_BA4_MEM_IO	1'b0
+`define  WB_BA5_MEM_IO	1'b0  
+
+// initial value for WB image address masks. 
+`define  WB_AM1 20'h0000_0
+`define  WB_AM2 20'h0000_0
+`define  WB_AM3 20'h0000_0
+`define  WB_AM4 20'h0000_0
+`define  WB_AM5 20'h0000_0
+
+// initial value for WB translation addresses. The  initial values
+// are set after reset. When ADDR_TRAN_IMPL is defined then then Images 
+// are transleted to this adresses whithout access to pci_ta registers.
+`define WB_TA1 20'h0000_0
+`define WB_TA2 20'h0000_0
+`define WB_TA3 20'h0000_0
+`define WB_TA4 20'h0000_0
+`define WB_TA5 20'h0000_0
+
+`define WB_AT_EN1 1'b0
+`define WB_AT_EN2 1'b0
+`define WB_AT_EN3 1'b0
+`define WB_AT_EN4 1'b0
+`define WB_AT_EN5 1'b0
 
 // If this define is commented out, then address translation will not be implemented.
 // addresses will pass through bridge unchanged, regardles of address translation enable bits.
 // Address translation also slows down the decoding
+//When  ADDR_TRAN_IMPL this define is present then adress translation is enabled after reset.
 //`define ADDR_TRAN_IMPL
 
 // decode speed for WISHBONE definition - initial cycle on WISHBONE bus will take 1 WS for FAST, 2 WSs for MEDIUM and 3 WSs for slow.
@@ -199,11 +301,18 @@ capable device
 `define HEADER_DEVICE_ID    16'h0001
 `define HEADER_REVISION_ID  8'h01
 
-// Turn registered WISHBONE master outputs on or off
-// all outputs from WB Master state machine are registered, if this is defined - WB bus outputs as well as
-// outputs to internals of the core.
-//`define REGISTER_WBM_OUTPUTS
-
 // MAX Retry counter value for WISHBONE Master state-machine
 // 	This value is 8-bit because of 8-bit retry counter !!!
 `define WB_RTY_CNT_MAX			8'hff
+
+// define the macro below to disable internal retry generation in the wishbone master interface
+// used when wb master accesses extremly slow devices.
+//`define PCI_WBM_NO_RESPONSE_CNT_DISABLE
+
+//`define PCI_WB_REV_B3
+`define PCI_WBS_B3_RTY_DISABLE
+
+`ifdef GUEST
+    `define PCI_CPCI_HS_IMPLEMENT
+    `define PCI_SPOCI
+`endif
