@@ -53,10 +53,8 @@ pci_conf_cyc_addr_dec.v
 pci_cbe_en_crit.v
 pci_async_reset_flop.v
 bus_commands.v
-meta_flop.v
 pci_ram_16x40d.v
 timescale.v
-synchronizer_flop.v
 pci_constants.v
 
 Put library files here:
